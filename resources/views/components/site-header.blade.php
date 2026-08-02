@@ -3,6 +3,7 @@
     $links = [
         ['route' => 'vehicles.index', 'label' => 'Autos'],
         ['route' => 'sell.create', 'label' => 'Vende tu auto'],
+        ['route' => 'inspection.create', 'label' => 'Revisión precompra'],
         ['route' => 'about', 'label' => 'Cómo trabajamos'],
         ['route' => 'contact.create', 'label' => 'Contacto'],
     ];

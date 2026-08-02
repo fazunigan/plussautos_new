@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Brand;
 use App\Models\InspectionItem;
 use App\Models\Vehicle;
 use Illuminate\Contracts\View\View;
@@ -26,6 +27,14 @@ class HomeController extends Controller
             'latest' => $latest,
             'sample' => $sample,
             'sampleRows' => $this->rowsFor($sample),
+            // Para el buscador del héroe: solo marcas que tienen algo publicado,
+            // porque ofrecer un filtro que devuelve cero resultados es peor que
+            // no ofrecerlo.
+            'brands' => Brand::query()
+                ->whereHas('vehicles', fn ($query) => $query->listable())
+                ->orderBy('name')
+                ->get(),
+            'availableCount' => Vehicle::query()->listable()->count(),
         ]);
     }
 

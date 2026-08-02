@@ -3,6 +3,7 @@
 use App\Http\Controllers\AppraisalController;
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\InspectionServiceController;
 use App\Http\Controllers\PageController;
 use App\Http\Controllers\SitemapController;
 use App\Http\Controllers\VehicleController;
@@ -17,6 +18,11 @@ Route::get('/vende-tu-auto', [AppraisalController::class, 'create'])->name('sell
 Route::post('/vende-tu-auto', [AppraisalController::class, 'store'])
     ->middleware('throttle:10,1')
     ->name('sell.store');
+
+Route::get('/revision-precompra', [InspectionServiceController::class, 'create'])->name('inspection.create');
+Route::post('/revision-precompra', [InspectionServiceController::class, 'store'])
+    ->middleware('throttle:10,1')
+    ->name('inspection.store');
 
 Route::get('/contacto', [ContactController::class, 'create'])->name('contact.create');
 Route::post('/contacto', [ContactController::class, 'store'])

@@ -37,9 +37,13 @@ class LeadForm
                             ->columnSpanFull(),
                     ]),
 
-                Section::make('Auto que quiere vender')
+                Section::make('Auto externo')
+                    ->description('Datos del auto que el cliente quiere vender o que nos pide revisar.')
                     ->columns(2)
-                    ->visible(fn (Get $get) => $get('type') === LeadType::Tasacion->value)
+                    ->visible(fn (Get $get) => in_array($get('type'), [
+                        LeadType::Tasacion->value,
+                        LeadType::Revision->value,
+                    ], true))
                     ->schema([
                         TextInput::make('t_brand')->label('Marca'),
                         TextInput::make('t_model')->label('Modelo'),
@@ -51,6 +55,11 @@ class LeadForm
                             ->options(VehicleCondition::class),
                         TextInput::make('t_comuna')->label('Comuna'),
                         TextInput::make('t_plate')->label('Patente'),
+                        TextInput::make('t_listing_url')
+                            ->label('Enlace de la publicación')
+                            ->url()
+                            ->columnSpanFull()
+                            ->visible(fn (Get $get) => $get('type') === LeadType::Revision->value),
                     ]),
 
                 Section::make('Auto consultado')

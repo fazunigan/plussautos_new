@@ -29,6 +29,7 @@
             <h2 class="text-sm font-semibold text-white">Vender</h2>
             <ul class="mt-3 space-y-2.5 text-sm">
                 <li><a class="hover:text-white" href="{{ route('sell.create') }}">Vende tu auto</a></li>
+                <li><a class="hover:text-white" href="{{ route('inspection.create') }}">Revisión precompra</a></li>
                 <li><a class="hover:text-white" href="{{ route('about') }}">Cómo trabajamos</a></li>
                 <li><a class="hover:text-white" href="{{ route('contact.create') }}">Contacto</a></li>
             </ul>

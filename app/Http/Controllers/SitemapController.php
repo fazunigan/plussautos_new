@@ -18,6 +18,7 @@ class SitemapController extends Controller
             ['loc' => route('home'), 'changefreq' => 'daily', 'priority' => '1.0'],
             ['loc' => route('vehicles.index'), 'changefreq' => 'daily', 'priority' => '0.9'],
             ['loc' => route('sell.create'), 'changefreq' => 'monthly', 'priority' => '0.8'],
+            ['loc' => route('inspection.create'), 'changefreq' => 'monthly', 'priority' => '0.8'],
             ['loc' => route('about'), 'changefreq' => 'monthly', 'priority' => '0.6'],
             ['loc' => route('contact.create'), 'changefreq' => 'monthly', 'priority' => '0.5'],
             ['loc' => route('terms'), 'changefreq' => 'yearly', 'priority' => '0.2'],

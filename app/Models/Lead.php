@@ -29,6 +29,7 @@ class Lead extends Model
         't_condition',
         't_comuna',
         't_plate',
+        't_listing_url',
         'status',
         'source',
     ];
@@ -50,10 +51,10 @@ class Lead extends Model
         return $this->belongsTo(Vehicle::class);
     }
 
-    /** Resumen del auto que el dueño quiere vender, para la bandeja del panel. */
+    /** Resumen del auto externo (tasación o revisión), para la bandeja del panel. */
     public function appraisalSummary(): ?string
     {
-        if ($this->type !== LeadType::Tasacion) {
+        if (! $this->type->aboutExternalVehicle()) {
             return null;
         }
 
@@ -62,10 +63,10 @@ class Lead extends Model
             ->implode(' ') ?: null;
     }
 
-    /** Segunda línea de la bandeja: lo que define la oferta. */
+    /** Segunda línea de la bandeja: lo que define la oferta o la visita. */
     public function appraisalDetail(): ?string
     {
-        if ($this->type !== LeadType::Tasacion) {
+        if (! $this->type->aboutExternalVehicle()) {
             return null;
         }
 

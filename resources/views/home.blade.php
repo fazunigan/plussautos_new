@@ -1,81 +1,57 @@
 @extends('layouts.app')
 
-@section('title', 'Pluss Autos · Autos usados con la inspección publicada')
-@section('description', 'Publicamos la inspección completa de cada auto, defectos incluidos, con foto de cada detalle. Te llevamos el auto para que lo pruebes donde estés.')
+@section('title', 'Pluss Autos · Compra y venta de autos usados')
+@section('description', 'Autos usados revisados y con los papeles al día. Elige del catálogo, prueba el auto donde te acomode y llévatelo con la transferencia hecha el mismo día.')
 
 @section('content')
-    @php
-        $hero = $latest->first();
-        $heroDetails = $hero?->documented_details_count ?? 0;
-        // Mientras el auto más nuevo no tenga fotos cargadas, la segunda columna
-        // no tiene qué mostrar. En vez de dejar medio héroe en azul vacío, el
-        // símbolo de la marca ocupa el espacio como filigrana.
-        $heroImage = $hero?->coverUrl('full');
-    @endphp
-
-    {{-- Héroe --}}
+    {{-- Héroe. Vende autos, no vende el método: lo que va arriba es el producto
+         y la entrada al catálogo. La inspección publicada es un respaldo del
+         argumento, no el argumento, y tiene su propia sección más abajo. --}}
     <section class="relative overflow-hidden bg-primary text-white">
-        @unless ($heroImage)
-            <img src="{{ asset('img/mark-white.webp') }}"
-                 alt="" aria-hidden="true"
-                 width="900" height="720" decoding="async"
-                 class="pointer-events-none absolute -right-10 top-1/2 hidden w-[28rem] -translate-y-1/2 opacity-[0.07] lg:block xl:-right-16 xl:w-[36rem]">
-        @endunless
-
-        <div @class([
-            'relative mx-auto grid max-w-[1240px] items-center gap-10 px-5 py-[clamp(3rem,7vw,5.5rem)]',
-            'lg:grid-cols-[1.05fr_1fr] lg:gap-14' => $heroImage,
-        ])>
+        <div class="relative mx-auto grid max-w-[1240px] items-center gap-10 px-5 py-[clamp(3rem,7vw,5rem)] lg:grid-cols-[1.1fr_400px] lg:gap-14">
             {{-- Única coreografía de carga del sitio: primer pliegue y nada más. --}}
-            <div @class(['max-w-[62ch]' => ! $heroImage])>
+            <div>
                 <h1 class="anim-rise title-display text-3xl">
-                    Te mostramos los defectos antes de que preguntes.
+                    Tu próximo auto, revisado y con los papeles al día.
                 </h1>
 
-                <p class="anim-rise mt-6 max-w-[54ch] text-lg leading-relaxed text-white/85" style="--i: 1">
-                    Cada auto se publica con su inspección completa: qué está conforme, qué tiene
-                    observaciones, y una foto de cada detalle. Lo que en otros lados hay que ir a
-                    descubrir en persona, acá está escrito.
+                <p class="anim-rise mt-6 max-w-[52ch] text-lg leading-relaxed text-white/85" style="--i: 1">
+                    Elige del catálogo, pruébalo donde te acomode y llévatelo con la
+                    transferencia hecha el mismo día. También compramos el tuyo.
                 </p>
 
                 <div class="anim-rise mt-9 flex flex-wrap gap-3" style="--i: 2">
-                    <a href="{{ route('vehicles.index') }}"
-                       class="rounded-[10px] bg-bg px-6 py-3.5 font-semibold text-primary transition-transform duration-150 ease-out-quint hover:-translate-y-0.5">
+                    <x-btn href="{{ route('vehicles.index') }}" variant="onDark">
                         Ver autos disponibles
-                    </a>
+                    </x-btn>
                     {{-- Ancla y no enlace a otra página: el cotizador está más
                          abajo en esta misma portada. --}}
                     <x-btn href="#cotizador" variant="outlineOnDark">
-                        Cotizar mi auto
+                        Vender mi auto
                     </x-btn>
                 </div>
 
-                <p class="anim-rise mt-7 text-sm text-white/70" style="--i: 3">
-                    Coordinamos la prueba del auto donde a ti te acomode.
-                </p>
+                <ul class="anim-rise mt-9 flex flex-wrap gap-x-7 gap-y-2 text-sm text-white/75" style="--i: 3">
+                    @foreach ([
+                        'Inspección de '.\App\Support\InspectionChecklist::totalPoints().' puntos publicada',
+                        'Prueba a domicilio',
+                        'Transferencia digital',
+                    ] as $punto)
+                        <li class="flex items-center gap-2">
+                            <svg class="size-4 shrink-0" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                <path fill-rule="evenodd" d="M16.7 5.3a1 1 0 0 1 0 1.4l-7.5 7.5a1 1 0 0 1-1.4 0L3.3 9.7a1 1 0 1 1 1.4-1.4l3.8 3.8 6.8-6.8a1 1 0 0 1 1.4 0Z" clip-rule="evenodd"/>
+                            </svg>
+                            {{ $punto }}
+                        </li>
+                    @endforeach
+                </ul>
             </div>
 
-            @if ($heroImage)
-                <figure class="anim-fade relative" style="--i: 2">
-                    <img src="{{ $heroImage }}"
-                         alt="{{ $hero->coverAlt() }}"
-                         width="1600" height="1200" fetchpriority="high" decoding="async"
-                         class="aspect-[4/3] w-full rounded-[16px] object-cover">
-
-                    <figcaption class="absolute bottom-4 left-4 right-4 rounded-[10px] bg-bg/95 p-4 text-ink backdrop-blur-sm">
-                        <p class="text-sm font-semibold">{{ $hero->fullTitle() }}</p>
-                        <p class="mt-1 text-sm text-ink-muted">
-                            @if ($heroDetails > 0)
-                                {{ $heroDetails }} {{ \Illuminate\Support\Str::plural('detalle', $heroDetails) }}
-                                {{ \Illuminate\Support\Str::plural('documentado', $heroDetails) }},
-                                {{ \Illuminate\Support\Str::plural('cada uno', $heroDetails) }} con foto
-                            @else
-                                Inspección publicada en la ficha
-                            @endif
-                        </p>
-                    </figcaption>
-                </figure>
-            @endif
+            {{-- El buscador ocupa la segunda columna siempre: es más útil que una
+                 foto y no depende de que haya fotos cargadas. --}}
+            <div class="anim-fade" style="--i: 2">
+                <x-quick-search :brands="$brands" :available-count="$availableCount" />
+            </div>
         </div>
     </section>
 
@@ -190,6 +166,21 @@
 
     {{-- Te lo llevamos. Los números están justificados: es una secuencia real. --}}
     <section class="mx-auto max-w-[1240px] px-5 py-[clamp(4rem,8vw,7rem)]">
+        {{-- La misma pauta, ofrecida como servicio suelto a quien compra afuera. --}}
+        <div class="mb-[clamp(4rem,8vw,7rem)] flex flex-col items-start justify-between gap-6 rounded-[16px] border border-border p-7 transition duration-200 ease-out-quint hover:shadow-[0_6px_16px_oklch(0.2_0.022_259_/_0.10)] lg:flex-row lg:items-center">
+            <div>
+                <h2 class="text-xl font-semibold">¿El auto que te gustó no es nuestro?</h2>
+                <p class="mt-2 max-w-[62ch] leading-relaxed text-ink-muted">
+                    Lo revisamos igual. Vamos a verlo donde esté, le aplicamos la misma pauta de
+                    {{ \App\Support\InspectionChecklist::totalPoints() }} puntos y te entregamos el
+                    informe completo con fotos antes de que lo compres.
+                </p>
+            </div>
+            <x-btn href="{{ route('inspection.create') }}" variant="outline" class="shrink-0 px-5 py-3">
+                Revisión precompra
+            </x-btn>
+        </div>
+
         <h2 class="title-display max-w-[22ch] text-2xl">
             Te llevamos el auto donde estés.
         </h2>
@@ -244,12 +235,24 @@
         </div>
     </section>
 
-    {{-- Preguntas --}}
+    {{-- Preguntas. En dos columnas como la sección de la hoja: un bloque de 72
+         caracteres suelto dentro de un contenedor de 1240 px dejaba media
+         sección vacía y rompía la alineación con el resto de la portada. --}}
     <section class="mx-auto max-w-[1240px] px-5 py-[clamp(4rem,8vw,7rem)]">
-        <h2 class="title-display text-2xl">Preguntas frecuentes</h2>
+        <div class="grid gap-10 lg:grid-cols-[0.62fr_1fr] lg:gap-16">
+            <div>
+                <h2 class="title-display text-2xl">Preguntas frecuentes</h2>
+                <p class="mt-4 max-w-[42ch] leading-relaxed text-ink-muted">
+                    Si lo que buscas no está acá, escríbenos por WhatsApp y te respondemos
+                    durante el día.
+                </p>
+                <x-btn href="{{ route('contact.create') }}" variant="outline" class="mt-6 px-5 py-3">
+                    Ir a contacto
+                </x-btn>
+            </div>
 
-        <div class="mt-8 max-w-[72ch] divide-y divide-border border-y border-border">
-            @foreach ([
+            <div class="divide-y divide-border border-y border-border">
+                @foreach ([
                 ['¿Por qué publican los defectos de los autos?', 'Porque igual los vas a encontrar. Publicarlos antes te ahorra el viaje y a nosotros la conversación incómoda. El precio de cada auto ya considera lo que tiene.'],
                 ['¿Puedo ver el auto antes de comprarlo?', 'Sí. Coordinamos y llevamos el auto donde estés para que lo revises y lo manejes. También puedes llevarlo a tu mecánico de confianza.'],
                 ['¿Los autos tienen informe legal?', 'Sí. Cada ficha incluye el estado de los papeles y el número de dueños anteriores. El informe completo te lo entregamos antes de cerrar.'],
@@ -268,7 +271,8 @@
                          display:none a visible y el navegador la dispara. --}}
                     <p class="anim-fila mt-3 max-w-[68ch] leading-relaxed text-ink-muted">{{ $answer }}</p>
                 </details>
-            @endforeach
+                @endforeach
+            </div>
         </div>
     </section>
 @endsection

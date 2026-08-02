@@ -27,7 +27,11 @@ class LeadsTable
                 TextColumn::make('type')
                     ->label('Tipo')
                     ->badge()
-                    ->color(fn (LeadType $state) => $state === LeadType::Tasacion ? 'warning' : 'info')
+                    ->color(fn (LeadType $state) => match ($state) {
+                        LeadType::Tasacion => 'warning',
+                        LeadType::Revision => 'success',
+                        LeadType::Consulta => 'info',
+                    })
                     ->sortable(),
 
                 TextColumn::make('name')
@@ -42,7 +46,7 @@ class LeadsTable
 
                 TextColumn::make('about')
                     ->label('Sobre qué')
-                    ->state(fn (Lead $record) => $record->type === LeadType::Tasacion
+                    ->state(fn (Lead $record) => $record->type->aboutExternalVehicle()
                         ? $record->appraisalSummary()
                         : $record->vehicle?->fullTitle())
                     ->description(fn (Lead $record) => $record->appraisalDetail())

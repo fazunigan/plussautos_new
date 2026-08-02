@@ -6,7 +6,7 @@ return [
      * site_settings, editable desde el panel; esto solo cubre el arranque
      * en limpio y el entorno de pruebas.
      */
-    'whatsapp' => env('PLUSS_WHATSAPP', '56900000000'),
+    'whatsapp' => env('PLUSS_WHATSAPP', '56951481009'),
     'email' => env('PLUSS_EMAIL', 'contacto@plussautos.cl'),
 
     /* Cantidad de vehículos por página en el catálogo. */
