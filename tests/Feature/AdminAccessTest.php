@@ -42,4 +42,56 @@ class AdminAccessTest extends TestCase
 
         $this->actingAs($admin)->get('/admin/leads')->assertSuccessful();
     }
+
+    public function test_el_acceso_esta_en_espanol_y_con_la_marca_del_negocio(): void
+    {
+        $this->get('/admin/login')
+            ->assertOk()
+            ->assertSee('Panel de administración')
+            ->assertSee('Ingresa para gestionar el catálogo y los leads.')
+            ->assertSee('Mantener la sesión iniciada')
+            // Logo a color: en el layout simple va dentro de la tarjeta blanca.
+            ->assertSee('img/logo.webp', escape: false);
+    }
+
+    /**
+     * El panel es del negocio: nada de widgets de fábrica ni de marca ajena.
+     *
+     * Se buscan rastros visibles, no la palabra "filament" a secas: las rutas
+     * de los assets y el objeto JavaScript la contienen y son plumbing interno,
+     * no marca a la vista del usuario.
+     */
+    public function test_el_panel_no_muestra_marca_ajena(): void
+    {
+        $admin = User::factory()->create(['is_admin' => true]);
+
+        $contenido = $this->actingAs($admin)->get('/admin')->assertOk()->getContent();
+
+        foreach ([
+            'filamentphp.com',
+            'Powered by',
+            'Documentation',
+            'Github',
+        ] as $rastro) {
+            $this->assertStringNotContainsString(
+                $rastro,
+                $contenido,
+                "El panel muestra «{$rastro}».",
+            );
+        }
+
+        $this->assertStringContainsString('Pluss Autos', $contenido);
+    }
+
+    public function test_el_inicio_del_panel_muestra_las_metricas_del_negocio(): void
+    {
+        $admin = User::factory()->create(['is_admin' => true]);
+
+        $this->actingAs($admin)->get('/admin')
+            ->assertOk()
+            ->assertSee('Autos publicados')
+            ->assertSee('Días en stock promedio')
+            ->assertSee('Leads del mes')
+            ->assertSee('Vendidos este mes');
+    }
 }
