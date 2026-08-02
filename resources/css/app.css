@@ -1,0 +1,230 @@
+@import 'tailwindcss';
+
+/* Tipografías autoalojadas: sin llamadas a Google Fonts.
+   De Archivo se usa la variante con eje de ancho, que permite dar autoridad
+   a los títulos sin recurrir a una segunda familia. */
+@import '@fontsource-variable/archivo/wdth.css';
+@import '@fontsource-variable/geist-mono';
+
+@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
+@source '../../storage/framework/views/*.php';
+@source '../**/*.blade.php';
+@source '../**/*.js';
+@source '../../app';
+
+@theme {
+    /* ---- Superficies ---- */
+    --color-bg: oklch(1 0 0);
+    --color-surface: oklch(0.975 0.007 259); /* #F4F7FC */
+    --color-border: oklch(0.9 0.012 259); /* #D9DEE6 */
+
+    /* ---- Tinta. Contrastes medidos contra blanco puro ---- */
+    --color-ink: oklch(0.2 0.022 259); /* #101620 · 18.1:1 */
+    --color-ink-muted: oklch(0.45 0.02 259); /* #4F5661 ·  7.4:1 */
+
+    /* ---- Marca. El primario es el azul exacto del logo: #004AAD ---- */
+    --color-primary: oklch(0.437 0.171 259.2); /* #004AAD ·  8.1:1 */
+    --color-primary-deep: oklch(0.285 0.115 259.2); /* #002561 · 14.6:1 */
+    --color-primary-soft: oklch(0.945 0.028 259.2); /* #E2EEFF */
+
+    /* ---- Acento ámbar: solo señalización, nunca relleno grande.
+       Azul cobalto con botones ámbar lee como IKEA; el ámbar queda
+       reservado para el estado "Reservado" y los marcadores de
+       observación, donde además significa algo. ---- */
+    --color-accent: oklch(0.72 0.155 62); /* #E88B23 · 7.0:1 con ink encima */
+    --color-accent-ink: oklch(0.47 0.14 58); /* #924000 ·  7.1:1 */
+
+    /* ---- Error de formulario. Es su propio color y no el acento: un campo
+       mal llenado y una observación de inspección no significan lo mismo. ---- */
+    --color-danger: oklch(0.505 0.19 27); /* #B91C1E ·  6.5:1 */
+
+    /* ---- Tipografía ---- */
+    --font-sans: 'Archivo Variable', ui-sans-serif, system-ui, sans-serif;
+    --font-mono: 'Geist Mono Variable', ui-monospace, monospace;
+
+    /* Escala modular de razón 1.28. El techo de display es 3.75rem: un sitio
+       que grita contradice la personalidad de la marca. */
+    --text-xs: 0.78rem;
+    --text-sm: 0.875rem;
+    --text-base: 1rem;
+    --text-lg: 1.28rem;
+    --text-xl: clamp(1.5rem, 1.2rem + 1.4vw, 1.95rem);
+    --text-2xl: clamp(1.95rem, 1.5rem + 2.2vw, 2.75rem);
+    --text-3xl: clamp(2.5rem, 1.8rem + 3.4vw, 3.75rem);
+
+    /* ---- Radios. Nada por sobre 16px ---- */
+    --radius-sm: 8px;
+    --radius-md: 10px;
+    --radius-lg: 16px;
+
+    /* ---- Movimiento ---- */
+    --ease-out-quint: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* Escala semántica de apilamiento. Nunca valores arbitrarios como 9999. */
+@utility z-dropdown {
+    z-index: 10;
+}
+@utility z-sticky {
+    z-index: 20;
+}
+@utility z-overlay {
+    z-index: 30;
+}
+@utility z-modal {
+    z-index: 40;
+}
+@utility z-toast {
+    z-index: 50;
+}
+
+/* Títulos: peso y ancho hacen el trabajo que en otros sitios hace una
+   segunda familia tipográfica. */
+@utility title-display {
+    font-weight: 700;
+    font-variation-settings: 'wdth' 105;
+    letter-spacing: -0.02em;
+    text-wrap: balance;
+    line-height: 1.05;
+}
+
+/* Cifras tabulares: el comprador compara km, año y precio en columna. */
+@utility figure-mono {
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.01em;
+}
+
+/* ---------------------------------------------------------------
+   Micro-animaciones
+
+   Todas usan `animation`, nunca `transition`, y ninguna define el
+   estado final: el fotograma inicial es la única desviación y el
+   reposo es el estado natural del elemento. Si la animación no
+   llega a ejecutarse (pestaña oculta, render sin compositor, motor
+   sin soporte), el contenido igual se ve.
+
+   No hay revelados al hacer scroll. Una misma entrada repetida en
+   cada sección es el tic que delata una plantilla; acá la entrada
+   se reserva para el primer pliegue y para las grillas, donde el
+   orden comunica algo real.
+   --------------------------------------------------------------- */
+
+@keyframes pluss-rise {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+}
+
+@keyframes pluss-row {
+    from {
+        opacity: 0;
+        transform: translateY(6px);
+    }
+}
+
+@keyframes pluss-fade {
+    from {
+        opacity: 0;
+    }
+}
+
+@utility anim-rise {
+    animation: pluss-rise 520ms var(--ease-out-quint) both;
+    animation-delay: calc(var(--i, 0) * 70ms);
+}
+
+@utility anim-fila {
+    animation: pluss-row 300ms var(--ease-out-quint) both;
+}
+
+/* Desvanecido en el borde del scroll: indica que hay más contenido sin
+   recurrir a una sombra ni a una barra siempre visible. */
+@utility fade-b {
+    mask-image: linear-gradient(to bottom, #000 calc(100% - 32px), transparent);
+}
+
+@utility fade-r {
+    mask-image: linear-gradient(to right, #000 calc(100% - 32px), transparent);
+}
+
+@utility anim-fade {
+    animation: pluss-fade 600ms var(--ease-out-quint) both;
+    animation-delay: calc(var(--i, 0) * 70ms);
+}
+
+@layer components {
+    /* Escalonado de grillas. El orden de entrada es la respuesta visible a
+       un filtro aplicado, que en este catálogo es una recarga de página. */
+    .anim-grid > * {
+        animation: pluss-rise 420ms var(--ease-out-quint) both;
+        animation-delay: calc(var(--i, 0) * 55ms);
+    }
+
+    /* Subrayado que crece desde la izquierda en la navegación. */
+    .link-underline {
+        position: relative;
+    }
+
+    .link-underline::after {
+        content: '';
+        position: absolute;
+        inset-inline: 0;
+        bottom: -4px;
+        height: 2px;
+        background: currentColor;
+        transform: scaleX(0);
+        transform-origin: left;
+        transition: transform 200ms var(--ease-out-quint);
+    }
+
+    .link-underline:hover::after,
+    .link-underline[aria-current='page']::after {
+        transform: scaleX(1);
+    }
+}
+
+@layer base {
+    [x-cloak] {
+        display: none !important;
+    }
+
+    html {
+        scroll-behavior: smooth;
+    }
+
+    p {
+        text-wrap: pretty;
+    }
+
+    /* Foco visible y consistente en todo el sitio. */
+    :focus-visible {
+        outline: 2px solid var(--color-accent-ink);
+        outline-offset: 2px;
+    }
+
+    /* El uso base es una mano en la calle: nada de retardo táctil. */
+    button,
+    [role='button'],
+    a {
+        touch-action: manipulation;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    html {
+        scroll-behavior: auto;
+    }
+
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        /* El retardo también se anula: sin esto, un escalonado de 300 ms
+           deja el contenido en su fotograma inicial todo ese tiempo. */
+        animation-delay: 0ms !important;
+        transition-duration: 0.01ms !important;
+    }
+}
