@@ -8,7 +8,26 @@ Compraventa de autos usados sin punto físico de ventas. El sitio no es un folle
 
 ## Stack
 
-Laravel 12, PHP 8.4, PostgreSQL 18, Redis, Blade con Tailwind 4 y Alpine en el público, Filament 4 en el panel. Todo corre en Docker con Laravel Sail: no se instala nada en la máquina.
+Laravel 12, PHP 8.3, PostgreSQL 18, Redis, Blade con Tailwind 4 y Alpine en el público, Filament 4 en el panel. Todo corre en Docker con Laravel Sail: no se instala nada en la máquina.
+
+### La versión de PHP está fijada en tres lugares y deben coincidir
+
+```json
+// composer.json
+"config": { "platform": { "php": "8.3.30" } }
+```
+
+```yaml
+# compose.yaml
+context: './vendor/laravel/sail/runtimes/8.3'
+image: 'sail-8.3/app'
+```
+
+Y el servidor de Forge, que hoy corre 8.3.30.
+
+`platform.php` es el que importa para el despliegue: obliga a Composer a resolver el `composer.lock` contra esa versión **sin importar qué PHP corra el contenedor donde se ejecute el comando**. Sin él, instalar un paquete desde un contenedor con PHP 8.4 deja en el lock dependencias que el servidor con 8.3 no puede instalar, y el despliegue falla con "Your lock file does not contain a compatible set of packages".
+
+**Para subir la versión de PHP:** primero cámbiala en Forge, después ajusta los tres lugares de arriba, corre `composer update` y reconstruye el contenedor. En ese orden.
 
 ## Levantar el entorno
 
