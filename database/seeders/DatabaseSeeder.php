@@ -6,7 +6,10 @@ use App\Enums\BodyType;
 use App\Enums\Fuel;
 use App\Enums\InspectionStatus;
 use App\Enums\Traction;
+use App\Enums\LeadStatus;
+use App\Enums\LeadType;
 use App\Enums\Transmission;
+use App\Enums\VehicleCondition;
 use App\Enums\VehicleOrigin;
 use App\Enums\VehicleStatus;
 use App\Models\Brand;
@@ -66,6 +69,26 @@ class DatabaseSeeder extends Seeder
         ],
     ];
 
+    /**
+     * Patentes y consignantes fijos, sin Faker. Formato chileno de cuatro
+     * letras y dos dígitos.
+     *
+     * @var list<string>
+     */
+    private const PLATES = [
+        'BKXR42', 'CJLT18', 'DHZP73', 'FKRV29', 'GLWS61', 'HMTB37', 'JNVC84',
+        'KPXD16', 'LRZF52', 'MSGH08', 'NTJK95', 'PVLM24', 'RWNQ67', 'SXPT31',
+    ];
+
+    /** @var list<array{0:string,1:string}> */
+    private const CONSIGNORS = [
+        ['Marcela Ibáñez', '+56 9 6604 3318'],
+        ['Cristián Loyola', '+56 9 8127 5540'],
+        ['Andrea Peñaloza', '+56 9 5473 9902'],
+        ['Sebastián Márquez', '+56 9 7215 8836'],
+        ['Valentina Aguirre', '+56 9 3948 1176'],
+    ];
+
     /** @var array<string, list<string>> */
     private const CATALOG = [
         'Toyota' => ['RAV4', 'Corolla', 'Hilux', 'Yaris', 'Land Cruiser Prado'],
@@ -101,12 +124,122 @@ class DatabaseSeeder extends Seeder
 
         $models = $this->seedCatalog();
 
-        foreach ($this->vehicleData() as $index => $data) {
-            $this->createVehicle($models, $data, $index);
+        // Idempotente a propósito: este seeder también puebla la demo en
+        // producción, y volver a correrlo no debe duplicar el catálogo.
+        if (Vehicle::query()->doesntExist()) {
+            foreach ($this->vehicleData() as $index => $data) {
+                $this->createVehicle($models, $data, $index);
+            }
         }
 
-        Lead::factory()->count(4)->create();
-        Lead::factory()->appraisal()->count(6)->create();
+        if (Lead::query()->doesntExist()) {
+            foreach ($this->leadData() as $lead) {
+                Lead::create($lead);
+            }
+        }
+    }
+
+    /**
+     * Leads de muestra escritos a mano.
+     *
+     * No usa factories porque estas dependen de fakerphp/faker, que es una
+     * dependencia de desarrollo: en producción se instala con --no-dev y la
+     * llamada a fake() revienta. Un seeder cuyo propósito es poblar la demo
+     * tiene que poder correr donde está la demo.
+     *
+     * @return list<array<string, mixed>>
+     */
+    private function leadData(): array
+    {
+        return [
+            [
+                'type' => LeadType::Consulta,
+                'name' => 'Camila Torres',
+                'phone' => '+56 9 8412 6630',
+                'email' => 'camila.torres@example.cl',
+                'message' => '¿El Mazda sigue disponible? ¿Reciben parte de pago?',
+                'status' => LeadStatus::Nuevo,
+                'source' => 'contacto',
+            ],
+            [
+                'type' => LeadType::Consulta,
+                'name' => 'Ignacio Rivas',
+                'phone' => '+56 9 7745 2018',
+                'message' => 'Busco una camioneta 4x4 hasta 22 millones.',
+                'status' => LeadStatus::Contactado,
+                'source' => 'contacto',
+            ],
+            [
+                'type' => LeadType::Tasacion,
+                'name' => 'Paula Sandoval',
+                'phone' => '+56 9 6218 4477',
+                'email' => 'psandoval@example.cl',
+                't_brand' => 'Hyundai',
+                't_model' => 'Tucson',
+                't_version' => 'GLS 2.0',
+                't_year' => 2017,
+                't_mileage_km' => 118_400,
+                't_condition' => VehicleCondition::Bueno,
+                't_comuna' => 'La Florida',
+                't_plate' => 'JKZR41',
+                'status' => LeadStatus::Nuevo,
+                'source' => 'vende-tu-auto',
+            ],
+            [
+                'type' => LeadType::Tasacion,
+                'name' => 'Rodrigo Mellado',
+                'phone' => '+56 9 5530 9182',
+                't_brand' => 'Chevrolet',
+                't_model' => 'Sail',
+                't_year' => 2016,
+                't_mileage_km' => 142_900,
+                't_condition' => VehicleCondition::Regular,
+                't_comuna' => 'Maipú',
+                'message' => 'Tiene un golpe en la puerta del copiloto.',
+                'status' => LeadStatus::EnNegociacion,
+                'source' => 'vende-tu-auto',
+            ],
+            [
+                'type' => LeadType::Tasacion,
+                'name' => 'Fernanda Ortiz',
+                'phone' => '+56 9 9034 7756',
+                'email' => 'f.ortiz@example.cl',
+                't_brand' => 'Toyota',
+                't_model' => 'Yaris',
+                't_version' => 'Sport 1.5',
+                't_year' => 2020,
+                't_mileage_km' => 52_300,
+                't_condition' => VehicleCondition::Excelente,
+                't_comuna' => 'Providencia',
+                'status' => LeadStatus::Cerrado,
+                'source' => 'vende-tu-auto',
+            ],
+            [
+                'type' => LeadType::Revision,
+                'name' => 'Diego Fuenzalida',
+                'phone' => '+56 9 4471 2205',
+                'email' => 'diego.f@example.cl',
+                't_brand' => 'Volkswagen',
+                't_model' => 'Amarok',
+                't_year' => 2018,
+                't_comuna' => 'Puente Alto',
+                't_listing_url' => 'https://www.chileautos.cl/aviso/ejemplo-123456',
+                'message' => 'La vende un particular, quiero revisarla antes de pagar el pie.',
+                'status' => LeadStatus::Nuevo,
+                'source' => 'revision-precompra',
+            ],
+            [
+                'type' => LeadType::Revision,
+                'name' => 'Javiera Núñez',
+                'phone' => '+56 9 3390 6614',
+                't_brand' => 'Kia',
+                't_model' => 'Rio',
+                't_year' => 2019,
+                't_comuna' => 'Ñuñoa',
+                'status' => LeadStatus::Contactado,
+                'source' => 'revision-precompra',
+            ],
+        ];
     }
 
     /** @return array<string, VehicleModel> */
@@ -188,9 +321,9 @@ class DatabaseSeeder extends Seeder
             'sold_at' => $index === 12 ? now()->subDays(4) : null,
             'featured' => $index < 2,
             'origin' => $isConsignment ? VehicleOrigin::Consignment : VehicleOrigin::Own,
-            'plate' => strtoupper(fake()->bothify('??##??')),
-            'consignor_name' => $isConsignment ? fake()->name() : null,
-            'consignor_phone' => $isConsignment ? '+569'.fake()->numerify('########') : null,
+            'plate' => self::PLATES[$index % count(self::PLATES)],
+            'consignor_name' => $isConsignment ? self::CONSIGNORS[$index % count(self::CONSIGNORS)][0] : null,
+            'consignor_phone' => $isConsignment ? self::CONSIGNORS[$index % count(self::CONSIGNORS)][1] : null,
             'purchase_price' => $isConsignment ? null : (int) ($price * 0.87),
             'commission_amount' => $isConsignment ? 450_000 : null,
             'location' => $isConsignment ? 'Domicilio del consignante, Ñuñoa' : 'Bodega, Quilicura',
